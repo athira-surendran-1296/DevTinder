@@ -1,0 +1,19 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "Connection platform for Developers",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js"
+  },
+  "keywords": [
+    "JavaScript",
+    "NodeJS"
+  ],
+  "author": "Athira Surendran",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
