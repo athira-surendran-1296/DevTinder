@@ -1,41 +1,39 @@
 const express = require("express");
 
+require("./config/database");
+
 const app = express();
+const connectDB = require("./config/database");
+const User = require("./models/user");
 
-const { adminAuth, userAuth } = require("./middlewares/auth");
-
-// Using app.use here as we are doing auth for all types of requests GET,POST,PUT,PATCH,DELETE
-app.use("/admin", adminAuth);
-
-app.get("/admin/getAllData", (req, res, next) => {
-    res.send("All data required for Admin");
-});
-
-app.get("/admin/getAllUserData", (req, res, next) => {
-    res.send("All user data required for Admin");
-});
-
-app.get("/user/getAllData", userAuth, (req, res, next) => {
-    res.send("All user data required for User");
-});
-
-app.get("/user/getErrorData", userAuth, (req, res, next) => {
-    throw new Error("ERROR");
-});
-
-// Better error handling using try catch
-app.get("/user/getErrorDataBetter", userAuth, (req, res, next) => {
+app.post("/signup", async (req, res) => {
     try {
-        // Sone code ...
-        throw new Error("ERROR");
-    } catch (err) {
-        res.status(500).send("Something went wrong - Contact support team!");
+        // Creating instance of a User modal
+        const user = new User({ 
+            firstName: "Varun",
+            lastName: "Kallinkeel",
+            emailId: "varunkallinkeel@gmail.com",
+            password: "varun@123",
+            age: 35,
+            gender: "Male"
+        }); 
+        await user.save();
+        res.send("User added successfully!");
+    } catch(err) {
+        res.status(401).send("Error saving the user:" + err.message);
     }
 });
 
-// Catches any unexpected error that occures in the app --> call API /user/getErrorData
+connectDB()
+    .then(() => {
+        console.log("Database connection established....");
+    }).catch(err => {
+        console.log("Database connection failed....", err);
+    });
+
+// Catches any unexpected error that occures in the app 
 app.use("/", (error, req, res, next) => {
-    if(error) {
+    if (error) {
         res.status(500).send("Something went wrong!")
     }
 });
