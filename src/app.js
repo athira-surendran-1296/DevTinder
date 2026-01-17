@@ -5,6 +5,7 @@ require("./config/database");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { checkIsUpdateAllowed } = require("./utils/validations");
 
 // To convert JSON data from client to JS object that the server understands
 app.use(express.json());
@@ -53,22 +54,24 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update a user by id
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
     try {
-        const userId = req.body.userId;
-        const beforeUpdateUser = await User.findByIdAndUpdate(userId, req.body, { returnDocument: "before" });
+        checkIsUpdateAllowed(req.body);
+        const userId = req.params.userId;
+        const beforeUpdateUser = await User.findByIdAndUpdate(userId, req.body, { returnDocument: "before", runValidators: true });
         console.log("Data before update", beforeUpdateUser);
         res.send("User updated successfully");
     } catch(err) {
-        res.status(400).send("Unable to update the user");
+        res.status(400).send("Unable to update the user: "+err.message);
     }
 });
 
 // Update user by email id
 app.patch("/userByEmail", async (req, res) => {
+    checkIsUpdateAllowed(req.body);
     const userEmailId = req.body.emailId;
     try {
-        const users = await User.find({emailId: userEmailId});
+        const users = await User.find({emailId: userEmailId}, {runValidators: true});
         if(users.length === 0) {
            res.status(400).send("User not found");
         }
