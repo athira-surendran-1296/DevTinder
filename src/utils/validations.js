@@ -1,19 +1,5 @@
 const validator = require("validator");
 
-const checkIsUpdateAllowed = (data) => {
-    const ALLOWED_UPDATES = ["age", "gender", "photoUrl", "about", "skills"];
-
-    const isUpdateAllowed = Object.keys(data).every(key => ALLOWED_UPDATES.includes(key));
-
-    if (data.skills && data.skills.length > 10) {
-        throw new Error("Only 10 skills are allowed!");
-    }
-
-    if (!isUpdateAllowed) {
-        throw new Error("Update not allowed!");
-    }
-};
-
 const validateLoginData = (emailId, password) => {
     if (!emailId || !password) {
         throw new Error("Please enter the details. Login failed!");
@@ -23,7 +9,13 @@ const validateLoginData = (emailId, password) => {
     }
 };
 
+const validateProfileEditData = (req) => {
+    const ALLOWED_EDIT = ["lastName", "age", "gender", "photoUrl", "about", "skills"];
+    const isEditAllowed = Object.keys(req.body).every(key => ALLOWED_EDIT.includes(key));
+    return isEditAllowed;
+};
+
 module.exports = {
-    checkIsUpdateAllowed,
-    validateLoginData
+    validateLoginData,
+    validateProfileEditData
 }
