@@ -1,5 +1,10 @@
-# Back end for Dev Tinder
-=========================
+# Notes
+
+Diving into the APIs and Express Router
+=======================================
+
+# API LIST
+
 # authRouter
 - POST /signup
 - POST /login
