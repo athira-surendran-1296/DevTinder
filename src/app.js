@@ -1,17 +1,21 @@
 const express = require("express");
-const validator = require("validator");
 
 require("./config/database");
 
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
-const { checkIsUpdateAllowed } = require("./utils/validations");
+const { checkIsUpdateAllowed, validateLoginData } = require("./utils/validations");
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const { userAuth } = require("./middlewares/auth");
 const saltRounds = 10;
 
 // To convert JSON data from client to JS object that the server understands
 app.use(express.json());
+
+// To parse cookie from client
+app.use(cookieParser())
 
 app.post("/signup", async (req, res) => {
     try {
@@ -34,26 +38,43 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
     try {
-        let {emailId, password} = req.body;
-        if(!emailId || !password) {
-            res.status(400).send("Please enter the details. Login failed!");
-        }
-        if(!validator.isEmail(emailId)) {
-            res.status(400).send("Invalid email id!");
-        }
-        const user = await User.find({ emailId: emailId });
-        console.log("USER", user);
-        if(user.length === 0) {
+        let { emailId, password } = req.body;
+
+        // Validate
+        validateLoginData(emailId, password);
+
+        const user = await User.findOne({ emailId: emailId });
+
+        if (!user) {
             res.status(400).send("No user found! Login failed!");
         }
+
         // Decrypt password
-        const isPasswordCorrect = await bcrypt.compare(password, user[0].password);
-        if(!isPasswordCorrect) {
+        // const isPasswordCorrect = await bcrypt.compare(password, user.password); // OFF LOAD - SCHEMA METHOD
+        const isPasswordCorrect = await user.validatePassword(password);
+
+        if (!isPasswordCorrect) {
             res.status(400).send("Incorrect password! Login failed!");
         }
+
+        // Create a jwt token
+        // let token = jwt.sign({ _id: user._id }, '$ATH-DEV-TINDER'); // OFF LOAD - SCHEMA METHOD
+        let token = await user.getJWT();
+
+        res.cookie("token", token, { expires: new Date(Date.now() + 900000)});
         res.send("Logged in successfully!");
     } catch (err) {
-        res.status(400).send("Login failed!"+ err.message);
+        res.status(400).send("Login failed!" + err.message);
+    }
+});
+
+// Get user profile
+app.get("/profile", userAuth, async (req, res) => {
+    try {
+        const user = req.user;
+        res.send(user);
+    } catch (err) {
+        res.status(400).send("Unable to fetch profile data: " + err.message);
     }
 });
 
@@ -95,7 +116,7 @@ app.patch("/user/:userId", async (req, res) => {
         checkIsUpdateAllowed(req.body);
         const userId = req.params.userId;
         const beforeUpdateUser = await User.findByIdAndUpdate(userId, req.body, { returnDocument: "before", runValidators: true });
-        console.log("Data before update", beforeUpdateUser);
+        // console.log("Data before update", beforeUpdateUser);
         res.send("User updated successfully");
     } catch (err) {
         res.status(400).send("Unable to update the user: " + err.message);
@@ -129,7 +150,7 @@ connectDB()
 // Catches any unexpected error that occures in the app 
 app.use("/", (error, req, res, next) => {
     if (error) {
-        res.status(500).send("Something went wrong!")
+        res.status(500).send("ERROR: " + error)
     }
 });
 

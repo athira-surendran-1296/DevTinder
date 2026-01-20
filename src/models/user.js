@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const { Schema } = mongoose;
 
@@ -67,6 +69,27 @@ const userSchema = new Schema(
     timestamps: true 
   }
 );
+
+// Schema methods
+
+// Always use normal functions and avoid using arrow functions to get the reference of this
+userSchema.methods.getJWT = async function () { 
+  const user = this; 
+
+  const token = await jwt.sign({ _id: user._id }, '$ATH-DEV-TINDER', 
+    { expiresIn: "7d" }
+  );
+
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (userInputPassword) {
+  const user = this;
+
+  const isPasswordCorrect = await bcrypt.compare(userInputPassword, user.password);
+
+  return isPasswordCorrect;
+}
 
 const User = mongoose.model("User", userSchema);
 
