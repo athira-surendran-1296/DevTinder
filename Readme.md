@@ -10,16 +10,17 @@
 - PATCH /profile/edit
 - PATCH /profile/password
 
+* Note : Available Status ---> ignore, intrested, accepted, rejected
+
 # connectionRequestRouter
-- POST /request/send/intrested/:userId
-- POST /request/send/ignored/:userId
+- POST /request/send/:status/:toUserId  
+    status: intrested, ignored
 
 - POST /request/review/accepted/:requestId
-- POST /request/review/rejected/:requestId
+    status: accepted, rejected
 
 # userRouter
 - GET /user/requests/received
 - GET /user/connections
 - GET /user/feed
 
-Status: ignore, intrested, accepted, rejected
