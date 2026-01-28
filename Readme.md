@@ -16,7 +16,7 @@
 - POST /request/send/:status/:toUserId  
     status: intrested, ignored
 
-- POST /request/review/accepted/:requestId
+- POST /request/review/:status/:requestId
     status: accepted, rejected
 
 # userRouter
