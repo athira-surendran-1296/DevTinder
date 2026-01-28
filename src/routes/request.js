@@ -57,4 +57,43 @@ router.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     }
 });
 
+router.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+        const { status, requestId } = req.params;
+
+        // Status value passed in API must be valid. Only [accepted, rejected] are allowed
+        const allowedStatus = ["accepted", "rejected"];
+        if(!allowedStatus.includes(status)) {
+            throw new Error("Invalid status");
+        }
+
+        // requestId should not be null 
+        if(!requestId) {
+            throw new Error("Invalid requestId");
+        }
+
+        const connectionRequest = await ConnectionRequest.findOne({
+            _id: requestId, // requestId must exist in DB
+            toUserId: loggedInUser._id, // The logged in user (the one reviewing the request) must be the toUserId of connection request
+            status: "interested" // Only a connection request that is currently in "intrested" must be updated using this API
+        });
+
+        if(!connectionRequest) {
+            throw new Error("Connection request not found!");
+        }
+
+        connectionRequest.status = status;
+
+        const updatedConnectionRequest = await connectionRequest.save();
+
+        res.json({
+            message: "Connection " + status,
+            data: updatedConnectionRequest
+        });
+    } catch (err) {
+        res.status(400).send("Unable to review connection request: " + err.message);
+    }
+});
+
 module.exports = router;
