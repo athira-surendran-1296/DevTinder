@@ -65,4 +65,48 @@ router.get("/user/connections", userAuth, async (req, res) => {
     }
 });
 
+router.get("/user/feed", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+
+        // Pagination
+        const page = req.query.page || 1;
+        let limit = req.query.limit || 10;
+        limit = limit > 50 ? 50 : limit;
+        const skip = (page - 1) * limit;
+
+        // Find all the connections of the logged in user (sent + received)
+        const connections = await ConnectionRequest.find({
+            $or: [
+                { fromUserId: loggedInUser._id },
+                { toUserId: loggedInUser._id },
+            ]
+        });
+
+        // Get the user id list of existing connection
+        const connectionUserIds = connections.map(row => {
+            if (row.fromUserId.equals(loggedInUser._id)) {
+                return (row.toUserId._id);
+            }
+            return (row.fromUserId._id);
+        });
+
+        const excludedUserIds = [...connectionUserIds, loggedInUser._id];
+
+        const feedData = await User.find({
+            _id: { $nin: excludedUserIds }
+        }).select(USER_SAFE_DATA)
+          .skip(skip)
+          .limit(limit);
+
+        res.json({
+            message: "Data fetched successfully",
+            data: feedData
+        });
+
+    } catch (err) {
+        res.status(400).send("Unable to fetch the feed data: " + err.message);
+    }
+});
+
 module.exports = router;
