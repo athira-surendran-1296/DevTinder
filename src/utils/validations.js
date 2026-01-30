@@ -10,7 +10,7 @@ const validateLoginData = (emailId, password) => {
 };
 
 const validateProfileEditData = (req) => {
-    const ALLOWED_EDIT = ["lastName", "age", "gender", "photoUrl", "about", "skills"];
+    const ALLOWED_EDIT = ["firstName", "lastName", "age", "gender", "photoUrl", "about", "skills"];
     const isEditAllowed = Object.keys(req.body).every(key => ALLOWED_EDIT.includes(key));
     return isEditAllowed;
 };

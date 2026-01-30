@@ -4,7 +4,7 @@ const User = require('../models/user');
 const userAuth = async (req, res, next) => {
     const { token } = req.cookies;
     if (!token) {
-        throw new Error("No token found! Kindly re-login.");
+        return res.status(401).json({message: "Kindly login."});
     }
     // Decode JWT
     let { _id } = jwt.verify(token, '$ATH-DEV-TINDER', { expiresIn: '1h' });

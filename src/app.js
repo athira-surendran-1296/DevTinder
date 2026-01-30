@@ -1,6 +1,7 @@
 require("./config/database");
 const connectDB = require("./config/database");
 const cookieParser = require('cookie-parser');
+var cors = require('cors')
 
 // Route imports
 const authRouter = require("./routes/auth");
@@ -10,6 +11,12 @@ const requestRouter = require("./routes/request");
 
 const express = require("express");
 const app = express();
+
+// Adds headers: Access-Control-Allow-Origin: *
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 
 // To convert JSON data from client to JS object that the server understands
 app.use(express.json());
@@ -28,13 +35,6 @@ connectDB()
     }).catch(err => {
         console.log("Database connection failed....", err);
     });
-
-// Catches any unexpected error that occures in the app 
-app.use("/", (error, req, res, next) => {
-    if (error) {
-        res.status(500).send("ERROR: " + error)
-    }
-});
 
 app.listen("7777", () => {
     console.log("Server listening on port 7777...");
