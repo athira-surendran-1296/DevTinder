@@ -17,9 +17,17 @@ router.post("/signup", async (req, res) => {
             firstName, lastName, emailId, age, gender, password: hashedPswd
         });
 
-        await user.save();
+        const signedUpUser = await user.save();
 
-        res.send("User added successfully!");
+        // Create a jwt token
+        let token = await signedUpUser.getJWT();
+
+        res.cookie("token", token, { expires: new Date(Date.now() + (60 * 60 * 1000))});
+        
+        res.json({
+            message: "User added successfully!",
+            data: signedUpUser
+        })
     } catch (err) {
         res.status(401).send("Error saving the user:" + err.message);
     }
@@ -50,7 +58,10 @@ router.post("/login", async (req, res) => {
 
         res.cookie("token", token, { expires: new Date(Date.now() + (60 * 60 * 1000))});
         
-        res.send("Logged in successfully!");
+        res.json({
+            message: "Logged in successfully!",
+            data: user
+        });
     } catch (err) {
         res.status(400).send("Login failed!" + err.message);
     }
