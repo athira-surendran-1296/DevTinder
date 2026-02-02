@@ -7,7 +7,7 @@ const userAuth = async (req, res, next) => {
         return res.status(401).json({message: "Kindly login."});
     }
     // Decode JWT
-    let { _id } = jwt.verify(token, '$ATH-DEV-TINDER', { expiresIn: '1h' });
+    let { _id } = jwt.verify(token, process.env.JWT_SECRET, { expiresIn: '1h' });
     const user = await User.findById(_id);
     if (!user) {
         throw new Error("No user found.");

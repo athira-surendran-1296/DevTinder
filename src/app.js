@@ -1,7 +1,9 @@
 require("./config/database");
 const connectDB = require("./config/database");
 const cookieParser = require('cookie-parser');
-var cors = require('cors')
+var cors = require('cors');
+
+require('dotenv').config();
 
 // Route imports
 const authRouter = require("./routes/auth");
@@ -12,7 +14,7 @@ const requestRouter = require("./routes/request");
 const express = require("express");
 const app = express();
 
-// Adds headers: Access-Control-Allow-Origin: *
+// Bypass CORS
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
@@ -36,6 +38,6 @@ connectDB()
         console.log("Database connection failed....", err);
     });
 
-app.listen("7777", () => {
+app.listen(process.env.PORT, () => {
     console.log("Server listening on port 7777...");
 });

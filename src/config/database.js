@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
-const { DB_CONNECTION_STRING, DB_NAME } = require("../../env");
 
 const connectDB = async () => {
     // Connect to clusture - Returns a promise
-    await mongoose.connect(DB_CONNECTION_STRING + DB_NAME) 
+    await mongoose.connect(process.env.DB_CONNECTION_STRING + process.env.DB_NAME);
 }
 
 module.exports = connectDB;
