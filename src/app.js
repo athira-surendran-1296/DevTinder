@@ -5,6 +5,8 @@ var cors = require('cors');
 
 require('dotenv').config();
 
+require("./utils/cronJob");
+
 // Route imports
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
