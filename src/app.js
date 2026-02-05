@@ -7,6 +7,8 @@ require('dotenv').config();
 
 require("./utils/cronJob");
 
+const http = require("http");
+
 // Route imports
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
@@ -14,6 +16,7 @@ const userRouter = require("./routes/user");
 const requestRouter = require("./routes/request");
 
 const express = require("express");
+const initialiseSocket = require("./utils/socket");
 const app = express();
 
 // Bypass CORS
@@ -26,7 +29,10 @@ app.use(cors({
 app.use(express.json());
 
 // To parse cookie from client
-app.use(cookieParser())
+app.use(cookieParser());
+
+const server = http.createServer(app);
+initialiseSocket(server);
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
@@ -40,6 +46,6 @@ connectDB()
         console.log("Database connection failed....", err);
     });
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log("Server listening on port 7777...");
 });
