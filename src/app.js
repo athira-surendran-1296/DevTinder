@@ -14,6 +14,7 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const userRouter = require("./routes/user");
 const requestRouter = require("./routes/request");
+const chatRouter = require("./routes/chat");
 
 const express = require("express");
 const initialiseSocket = require("./utils/socket");
@@ -38,6 +39,7 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", userRouter);
 app.use("/", requestRouter);
+app.use("/", chatRouter);
 
 connectDB()
     .then(() => {
